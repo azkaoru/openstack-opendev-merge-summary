@@ -33,7 +33,7 @@ def get_merged_diffs():
     gerrit_url = 'https://review.opendev.org'
     
     # 検索クエリを構築
-    query = f'status:{status}+repo:{repo_name}+age:{age}'
+    query = f'status:{status} repo:{repo_name} age:{age}'
     
     print(f"Searching for changes: {query}", file=sys.stderr)
     
