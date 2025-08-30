@@ -22,7 +22,8 @@ python3 get_merged_diffs.py
 
 - `OPENDEV_REPO_NAME`: 対象リポジトリ（デフォルト: `openstack/barbican`）
 - `OPENDEV_STATUS`: ステータスフィルター（デフォルト: `merged`）
-- `OPENDEV_AGE`: 期間フィルター（デフォルト: `1d`）
+- `OPENDEV_MERGED_AFTER`: マージされた日付の下限をYYYY-MM-DD形式で指定（デフォルト: ageから計算）
+- `OPENDEV_AGE`: 期間フィルター（デフォルト: `1d`）- merged_after日付に変換されます
 - `OPENDEV_DRY_RUN`: `true`に設定するとAPIコールを行わずクエリのみ表示
 
 ### 使用例
@@ -37,6 +38,9 @@ OPENDEV_REPO_NAME=openstack/nova python3 get_merged_diffs.py
 # 過去7日間のオープンな変更を取得
 OPENDEV_STATUS=open OPENDEV_AGE=7d python3 get_merged_diffs.py
 
+# 特定の日付以降のマージ済み変更を取得
+OPENDEV_MERGED_AFTER=2025-01-01 python3 get_merged_diffs.py
+
 # ドライランモード（APIコールなし）
 OPENDEV_DRY_RUN=true python3 get_merged_diffs.py
 
@@ -50,11 +54,11 @@ OPENDEV_REPO_NAME=openstack/keystone OPENDEV_STATUS=merged OPENDEV_AGE=3d python
 
 ```json
 {
-  "query": "status:merged+repo:openstack/barbican+age:1d",
+  "query": "status:merged repo:openstack/barbican mergedafter:2025-08-29",
   "count": 2,
   "repository": "openstack/barbican",
   "status": "merged",
-  "age": "1d",
+  "merged_after": "2025-08-29",
   "timestamp": "2024-01-01T12:00:00.000000",
   "changes": [
     {

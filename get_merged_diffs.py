@@ -8,7 +8,8 @@ via Gerrit REST API and outputs the changes data as JSON.
 Environment Variables:
 - OPENDEV_REPO_NAME: Repository name (default: openstack/barbican)
 - OPENDEV_STATUS: Status filter (default: merged)
-- OPENDEV_AGE: Age filter (default: 1d)
+- OPENDEV_MERGED_AFTER: Merged after date in YYYY-MM-DD format (default: calculated from age)
+- OPENDEV_AGE: Age filter (default: 1d) - converted to mergedafter date
 - OPENDEV_DRY_RUN: If set to 'true', only show query without making API calls
 """
 
@@ -18,6 +19,42 @@ import urllib.parse
 import os
 import sys
 from datetime import datetime, timedelta
+import re
+
+def parse_age_to_date(age_str):
+    """
+    Parse age string (like '1d', '7d', '30d') to a date string in YYYY-MM-DD format.
+    
+    Args:
+        age_str (str): Age string like '1d', '7d', '30d'
+        
+    Returns:
+        str: Date string in YYYY-MM-DD format
+    """
+    if not age_str:
+        age_str = '1d'
+    
+    # Parse the age string using regex
+    match = re.match(r'^(\d+)([dhm])$', age_str.lower())
+    if not match:
+        # If parsing fails, default to 1 day
+        days = 1
+    else:
+        number = int(match.group(1))
+        unit = match.group(2)
+        
+        if unit == 'd':
+            days = number
+        elif unit == 'h':
+            days = max(1, number // 24)  # Convert hours to days, minimum 1 day
+        elif unit == 'm':
+            days = max(1, number // (24 * 60))  # Convert minutes to days, minimum 1 day
+        else:
+            days = 1
+    
+    # Calculate the date
+    target_date = datetime.now() - timedelta(days=days)
+    return target_date.strftime('%Y-%m-%d')
 
 def get_merged_diffs():
     """
@@ -27,13 +64,18 @@ def get_merged_diffs():
     # 環境変数から設定を取得（デフォルト値付き）
     repo_name = os.getenv('OPENDEV_REPO_NAME', 'openstack/barbican')
     status = os.getenv('OPENDEV_STATUS', 'merged')
+    merged_after = os.getenv('OPENDEV_MERGED_AFTER')
     age = os.getenv('OPENDEV_AGE', '1d')
     dry_run = os.getenv('OPENDEV_DRY_RUN', '').lower() == 'true'
+    
+    # merged_afterが指定されていない場合は、ageから変換
+    if not merged_after:
+        merged_after = parse_age_to_date(age)
     
     gerrit_url = 'https://review.opendev.org'
     
     # 検索クエリを構築
-    query = f'status:{status} repo:{repo_name} age:{age}'
+    query = f'status:{status} repo:{repo_name} mergedafter:{merged_after}'
     
     print(f"Searching for changes: {query}", file=sys.stderr)
     
@@ -44,7 +86,7 @@ def get_merged_diffs():
             'count': 0,
             'repository': repo_name,
             'status': status,
-            'age': age,
+            'merged_after': merged_after,
             'timestamp': datetime.now().isoformat(),
             'changes': [],
             'dry_run': True
@@ -159,7 +201,7 @@ def get_merged_diffs():
         'count': len(result_changes),
         'repository': repo_name,
         'status': status,
-        'age': age,
+        'merged_after': merged_after,
         'timestamp': datetime.now().isoformat(),
         'changes': result_changes
     }
