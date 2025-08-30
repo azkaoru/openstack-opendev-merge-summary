@@ -6,10 +6,10 @@ This script fetches merged diff information from OpenStack repositories
 via Gerrit REST API and outputs the changes data as JSON.
 
 Environment Variables:
-- REPO_NAME: Repository name (default: openstack/barbican)
-- STATUS: Status filter (default: merged)
-- AGE: Age filter (default: 1d)
-- DRY_RUN: If set to 'true', only show query without making API calls
+- OPENDEV_REPO_NAME: Repository name (default: openstack/barbican)
+- OPENDEV_STATUS: Status filter (default: merged)
+- OPENDEV_AGE: Age filter (default: 1d)
+- OPENDEV_DRY_RUN: If set to 'true', only show query without making API calls
 """
 
 import requests
@@ -25,10 +25,10 @@ def get_merged_diffs():
     リポジトリの変更の差分を取得し、JSON形式で出力します。
     """
     # 環境変数から設定を取得（デフォルト値付き）
-    repo_name = os.getenv('REPO_NAME', 'openstack/barbican')
-    status = os.getenv('STATUS', 'merged')
-    age = os.getenv('AGE', '1d')
-    dry_run = os.getenv('DRY_RUN', '').lower() == 'true'
+    repo_name = os.getenv('OPENDEV_REPO_NAME', 'openstack/barbican')
+    status = os.getenv('OPENDEV_STATUS', 'merged')
+    age = os.getenv('OPENDEV_AGE', '1d')
+    dry_run = os.getenv('OPENDEV_DRY_RUN', '').lower() == 'true'
     
     gerrit_url = 'https://review.opendev.org'
     
