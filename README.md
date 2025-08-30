@@ -20,10 +20,10 @@ python3 get_merged_diffs.py
 
 以下の環境変数で動作をカスタマイズできます：
 
-- `REPO_NAME`: 対象リポジトリ（デフォルト: `openstack/barbican`）
-- `STATUS`: ステータスフィルター（デフォルト: `merged`）
-- `AGE`: 期間フィルター（デフォルト: `1d`）
-- `DRY_RUN`: `true`に設定するとAPIコールを行わずクエリのみ表示
+- `OPENDEV_REPO_NAME`: 対象リポジトリ（デフォルト: `openstack/barbican`）
+- `OPENDEV_STATUS`: ステータスフィルター（デフォルト: `merged`）
+- `OPENDEV_AGE`: 期間フィルター（デフォルト: `1d`）
+- `OPENDEV_DRY_RUN`: `true`に設定するとAPIコールを行わずクエリのみ表示
 
 ### 使用例
 
@@ -32,16 +32,16 @@ python3 get_merged_diffs.py
 python3 get_merged_diffs.py
 
 # 異なるリポジトリを指定
-REPO_NAME=openstack/nova python3 get_merged_diffs.py
+OPENDEV_REPO_NAME=openstack/nova python3 get_merged_diffs.py
 
 # 過去7日間のオープンな変更を取得
-STATUS=open AGE=7d python3 get_merged_diffs.py
+OPENDEV_STATUS=open OPENDEV_AGE=7d python3 get_merged_diffs.py
 
 # ドライランモード（APIコールなし）
-DRY_RUN=true python3 get_merged_diffs.py
+OPENDEV_DRY_RUN=true python3 get_merged_diffs.py
 
 # 複数の設定を組み合わせ
-REPO_NAME=openstack/keystone STATUS=merged AGE=3d python3 get_merged_diffs.py
+OPENDEV_REPO_NAME=openstack/keystone OPENDEV_STATUS=merged OPENDEV_AGE=3d python3 get_merged_diffs.py
 ```
 
 ## 出力形式
