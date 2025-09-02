@@ -11,6 +11,7 @@ Environment Variables:
 - OPENDEV_MERGED_AFTER: Merged after date in YYYY-MM-DD format (default: calculated from age)
 - OPENDEV_AGE: Age filter (default: 1d) - converted to mergedafter date
 - OPENDEV_DRY_RUN: If set to 'true', only show query without making API calls
+- OPENDEV_LOG: If set to 'true', show debug and info messages (default: false)
 """
 
 import requests
@@ -20,6 +21,17 @@ import os
 import sys
 from datetime import datetime, timedelta
 import re
+
+def log_message(message, file=sys.stderr):
+    """
+    Print log message only if OPENDEV_LOG environment variable is set to 'true'.
+    
+    Args:
+        message (str): Message to log
+        file: Output file (default: sys.stderr)
+    """
+    if os.getenv('OPENDEV_LOG', '').lower() == 'true':
+        print(message, file=file)
 
 def parse_age_to_date(age_str):
     """
@@ -77,10 +89,10 @@ def get_merged_diffs():
     # 検索クエリを構築
     query = f'status:{status} repo:{repo_name} mergedafter:{merged_after}'
     
-    print(f"Searching for changes: {query}", file=sys.stderr)
+    log_message(f"Searching for changes: {query}")
     
     if dry_run:
-        print("DRY_RUN mode: Skipping API calls", file=sys.stderr)
+        log_message("DRY_RUN mode: Skipping API calls")
         return {
             'query': query,
             'count': 0,
@@ -116,10 +128,10 @@ def get_merged_diffs():
         return None
 
     if not changes:
-        print(f"指定された条件 ({query}) でマージされた変更は見つかりませんでした。", file=sys.stderr)
+        log_message(f"指定された条件 ({query}) でマージされた変更は見つかりませんでした。")
         return {"changes": [], "query": query, "count": 0}
 
-    print(f"条件に一致する変更を {len(changes)} 件見つけました。", file=sys.stderr)
+    log_message(f"条件に一致する変更を {len(changes)} 件見つけました。")
     
     result_changes = []
     
@@ -127,7 +139,7 @@ def get_merged_diffs():
         change_id = change['id']
         change_subject = change['subject']
         
-        print(f"\n--- 変更を処理中: {change_subject} ({change_id}) ---", file=sys.stderr)
+        log_message(f"\n--- 変更を処理中: {change_subject} ({change_id}) ---")
 
         # 最新のリビジョンIDを取得します
         revision_id = change['current_revision']
@@ -157,7 +169,7 @@ def get_merged_diffs():
             file_paths = [path for path in files.keys() if not path.startswith('/')]
             
             if not file_paths:
-                print("この変更にはファイル変更が含まれていません。", file=sys.stderr)
+                log_message("この変更にはファイル変更が含まれていません。")
                 change_data['files'] = []
                 result_changes.append(change_data)
                 continue
@@ -182,7 +194,7 @@ def get_merged_diffs():
                     except json.JSONDecodeError:
                         # JSONでない場合はテキストとして保存
                         file_data['diff'] = diff_response.text
-                    print(f"ファイル差分を取得しました: {file_path}", file=sys.stderr)
+                    log_message(f"ファイル差分を取得しました: {file_path}")
                 else:
                     file_data['error_code'] = diff_response.status_code
                     print(f"差分情報の取得に失敗しました: {file_path}. ステータスコード: {diff_response.status_code}", file=sys.stderr)
