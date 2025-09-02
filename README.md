@@ -25,6 +25,7 @@ python3 get_merged_diffs.py
 - `OPENDEV_MERGED_AFTER`: マージされた日付の下限をYYYY-MM-DD形式で指定（デフォルト: ageから計算）
 - `OPENDEV_AGE`: 期間フィルター（デフォルト: `1d`）- merged_after日付に変換されます
 - `OPENDEV_DRY_RUN`: `true`に設定するとAPIコールを行わずクエリのみ表示
+- `OPENDEV_LOG`: `true`に設定するとデバッグ情報とログメッセージを表示（デフォルト: `false`）
 
 ### 使用例
 
@@ -43,6 +44,9 @@ OPENDEV_MERGED_AFTER=2025-01-01 python3 get_merged_diffs.py
 
 # ドライランモード（APIコールなし）
 OPENDEV_DRY_RUN=true python3 get_merged_diffs.py
+
+# デバッグ情報とログメッセージを表示
+OPENDEV_LOG=true python3 get_merged_diffs.py
 
 # 複数の設定を組み合わせ
 OPENDEV_REPO_NAME=openstack/keystone OPENDEV_STATUS=merged OPENDEV_AGE=3d python3 get_merged_diffs.py
